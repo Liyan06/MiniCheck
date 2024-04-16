@@ -1,5 +1,8 @@
 # MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents
 
+Authors: Liyan Tang, Philippe Laban, Greg Durrett
+
+Please check out our work [here]() 📃
 
 <p align="center">
     <img src="./images/main-figure.png" width="360">
@@ -31,3 +34,14 @@ The benchmark contains the following fields:
 |doc| Document used to check the corresponding claim|
 |claim| Claim to be checked by the corresponding document|
 |label| 1 if the claim can be supported by the doc, 0 otherwise|
+
+
+
+## *MiniCheck* Models
+
+Available soon.
+
+
+## Synthetic Data Generation 
+
+Available soon.
