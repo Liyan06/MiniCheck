@@ -64,3 +64,18 @@ A detailed walkthrough of the evaluation process on LLM-Aggrefact and replicatio
 ## Synthetic Data Generation 
 
 Available soon.
+
+
+## Citation
+
+If you found the benchmark useful, please consider citing our work.
+```{bibtex}
+@misc{tang2024minicheck,
+      title={MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents}, 
+      author={Liyan Tang and Philippe Laban and Greg Durrett},
+      year={2024},
+      eprint={2404.10774},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+```
