@@ -35,9 +35,30 @@ The benchmark contains the following fields:
 |claim| Claim to be checked by the corresponding document|
 |label| 1 if the claim is supported, 0 otherwise|
 
-## *MiniCheck* Models
+## *MiniCheck* Model Evaluation Demo
 
-Available soon.
+Please first clone our GitHub Repo and install necessary packages from `requirements.txt`. 
+
+Our MiniCheck models are available on HuggingFace 🤗 More model details can be found from this [collection](https://huggingface.co/collections/lytang/minicheck-and-llm-aggrefact-661c5d387082ad0b433dec65). Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Huggingface for the first time and cached in the specified directory.
+
+
+```python
+from minicheck.minicheck import MiniCheck
+
+doc = "A group of students gather in the school library to study for their upcoming final exams."
+claim_1 = "The students are preparing for an examination."
+claim_2 = "The students are on vacation."
+
+# model_name can be one of ['roberta-large', 'deberta-v3-large', 'flan-t5-large']
+# lytang/MiniCheck-Flan-T5-Large will be auto-downloaded from Huggingface for the first time
+scorer = MiniCheck(model_name='flan-t5-large', device=f'cuda:0', cache_dir='./ckpts')
+pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
+
+print(pred_label) # [1, 0]
+print(raw_prob)   # [0.9805923700332642, 0.007121307775378227]
+```
+
+A detailed walkthrough of the evaluation process on LLM-Aggrefact and replication of the results is available in this notebook:[inference-example-demo.ipynb](./inference-example-demo.ipynb).
 
 
 ## Synthetic Data Generation 

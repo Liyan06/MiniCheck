@@ -1,0 +1,6 @@
+torch==2.1.0
+transformers==4.34.0
+datasets==2.14.6
+nltk==3.8.1
+pandas==2.2.1
+numpy==1.26.2
