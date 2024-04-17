@@ -68,7 +68,7 @@ Available soon.
 
 ## Citation
 
-If you found the benchmark useful, please consider citing our work.
+If you found our work useful, please consider citing our work.
 ```{bibtex}
 @misc{tang2024minicheck,
       title={MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents}, 
