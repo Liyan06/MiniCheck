@@ -58,7 +58,7 @@ print(pred_label) # [1, 0]
 print(raw_prob)   # [0.9805923700332642, 0.007121307775378227]
 ```
 
-A detailed walkthrough of the evaluation process on LLM-Aggrefact and replication of the results is available in this notebook:[inference-example-demo.ipynb](./inference-example-demo.ipynb).
+A detailed walkthrough of the evaluation process on LLM-Aggrefact and replication of the results is available in this notebook: [inference-example-demo.ipynb](./inference-example-demo.ipynb).
 
 
 ## Synthetic Data Generation 

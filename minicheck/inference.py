@@ -160,17 +160,24 @@ class Inferencer():
         Standard aggregation (max) over chunks of doc
 
         Note: We do not have any post-processing steps for 'claim'
-        and directly check 'doc' against 'claim'. If there are multiple sentences in 'claim'. Sentences are not splitted and
-        are checked as a single piece of text.
+        and directly check 'doc' against 'claim'. If there are multiple 
+        sentences in 'claim'. Sentences are not splitted and are checked 
+        as a single piece of text.
         
-        If there are multiple sentences in 'claim', we suggest users to split 'claim' into sentences beforehand and prepares data like (doc, claim_1), (doc, claim_2), ... for
-        a multi-sentence 'claim'.
+        If there are multiple sentences in 'claim', we suggest users to 
+        split 'claim' into sentences beforehand and prepares data like 
+        (doc, claim_1), (doc, claim_2), ... for a multi-sentence 'claim'.
 
         **We leave the user to decide how to aggregate the results from multiple sentences.**
 
-        Note: AggreFact-CNN is the only dataset that contains three-sentence summaries and have annotations on the whole summaries, so we do not split the sentences in each 'claim' during prediciotn for simplicity. Therefore, for this dataset, our result is based on treating the whole summary as a single piece of text (one 'claim').
+        Note: AggreFact-CNN is the only dataset that contains three-sentence 
+        summaries and have annotations on the whole summaries, so we do not 
+        split the sentences in each 'claim' during prediciotn for simplicity. 
+        Therefore, for this dataset, our result is based on treating the whole 
+        summary as a single piece of text (one 'claim').
 
-        In general, sentence-level prediciton performance is better than that on the full-response-level.
+        In general, sentence-level prediciton performance is better than that on 
+        the full-response-level.
         """
 
         if isinstance(doc, str) and isinstance(claim, str):
