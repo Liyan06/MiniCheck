@@ -37,6 +37,10 @@ The benchmark contains the following fields:
 
 ## *MiniCheck* Model Evaluation Demo
 
+<p align="center">
+    <img src="./images/cost.png" width="360">
+</p>
+
 Please first clone our GitHub Repo and install necessary packages from `requirements.txt`. 
 
 Our MiniCheck models are available on HuggingFace 🤗 More model details can be found from this [collection](https://huggingface.co/collections/lytang/minicheck-and-llm-aggrefact-661c5d387082ad0b433dec65). Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Huggingface for the first time and cached in the specified directory.
@@ -63,7 +67,7 @@ A detailed walkthrough of the evaluation process on LLM-Aggrefact and replicatio
 
 ## Synthetic Data Generation 
 
-Available soon.
+Code and our 14K training data will be available soon.
 
 
 ## Citation
