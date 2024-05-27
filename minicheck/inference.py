@@ -25,7 +25,7 @@ def sent_tokenize_with_newlines(text):
 
 
 class Inferencer():
-    def __init__(self, model_name, device, chunk_size, max_input_length, batch_size, cache_dir) -> None:
+    def __init__(self, model_name, device, max_input_length, batch_size, cache_dir) -> None:
         
         self.model_name = model_name
         self.device = device
@@ -39,19 +39,16 @@ class Inferencer():
             self.model = AutoModelForSeq2SeqLM.from_pretrained(ckpt, cache_dir=cache_dir).to(self.device)
             self.tokenizer = AutoTokenizer.from_pretrained(ckpt, cache_dir=cache_dir)
 
-            self.chunk_size=500 if chunk_size is None else chunk_size
             self.max_input_length=2048 if max_input_length is None else max_input_length
             self.max_output_length = 256
         
         else:
             if model_name == 'roberta-large':
                 ckpt = 'lytang/MiniCheck-RoBERTa-Large'
-                self.chunk_size=400 if chunk_size is None else chunk_size
                 self.max_input_length=512 if max_input_length is None else max_input_length
 
             elif model_name == 'deberta-v3-large':
                 ckpt = 'lytang/MiniCheck-DeBERTa-v3-Large'
-                self.chunk_size=400 if chunk_size is None else chunk_size
                 self.max_input_length=2048 if max_input_length is None else max_input_length
                 
             else:
@@ -76,7 +73,7 @@ class Inferencer():
         using self.inference to batch the process
         """
 
-        assert len(doc) == len(claim), "doc must has the same length with claimthesis!"
+        assert len(doc) == len(claim), "doc must has the same length with claim!"
 
         max_support_probs = []
         used_chunks = []
@@ -142,6 +139,7 @@ class Inferencer():
         doc_sents = doc_sents or ['']
 
         doc_chunks = [chunk.replace(" \n ", '\n').strip() for chunk in chunks(doc_sents, self.chunk_size)]
+        doc_chunks = [chunk for chunk in doc_chunks if chunk != '']
 
         '''
         [chunk_1, chunk_2, chunk_3, chunk_4, ...]
