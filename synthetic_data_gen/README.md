@@ -21,7 +21,7 @@ python C2D_gen.py --claim "By this date, over 5,000 members of the caravan were 
 
 ### D2C Data Generation
 
-We start with any human-written documents to start with. The goal is to generate claims and pair them with portions of the human written document, which, once again, require multi-sentence, multi-fact reasoning to check the claims.
+We start with any human-written documents to start with. The goal is to generate claims and pair them with portions of the human written document, which, once again, require multi-sentence, multi-fact reasoning to check the claims. **We assume the document length is around 500 words. Longer documents would make the data generation more costly in general due to the "leave-one-sent-out" document augmentation method.**
 
 We provide the D2C code for generating (doc, claim, label) triples for a given document. We use the document mentioned in our work as an example. The original website for the document can be found [here](https://www.indiewire.com/news/box-office/strikes-over-damage-theatrical-box-office-1234925398/).
 ```
