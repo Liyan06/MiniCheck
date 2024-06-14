@@ -70,7 +70,6 @@ A detailed walkthrough of the evaluation process on LLM-Aggrefact and replicatio
 Code for generating synthetic data (both C2D and D2C methods) is available in the [`synthetic_data_gen`](./synthetic_data_gen) directory.
 Our 14K synthetic data (7K C2D and 7K D2C) used for model training is available on HuggingFace 🤗 and can be found [here]().
 
-```python
 
 ## Citation
 
