@@ -19,7 +19,7 @@ LLM-AggreFact is a fact verification benchmark. It aggregates 10 of the most up-
 
 ### Benchmark Access
 
-Our Benchmark is available on HuggingFace 🤗 More benchmark details can be found [here](https://huggingface.co/datasets/lytang/LLM-AggreFact).
+Our Benchmark is available on Hugging Face 🤗 More benchmark details can be found [here](https://huggingface.co/datasets/lytang/LLM-AggreFact).
 
 ```python
 from datasets import load_dataset
@@ -43,7 +43,7 @@ The benchmark contains the following fields:
 
 Please first clone our GitHub Repo and install necessary packages from `requirements.txt`. 
 
-Our MiniCheck models are available on HuggingFace 🤗 More model details can be found from this [collection](https://huggingface.co/collections/lytang/minicheck-and-llm-aggrefact-661c5d387082ad0b433dec65). Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Huggingface for the first time and cached in the specified directory.
+Our MiniCheck models are available on Hugging Face 🤗 More model details can be found from this [collection](https://huggingface.co/collections/lytang/minicheck-and-llm-aggrefact-661c5d387082ad0b433dec65). Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Hugging Face for the first time and cached in the specified directory.
 
 
 ```python
@@ -54,7 +54,7 @@ claim_1 = "The students are preparing for an examination."
 claim_2 = "The students are on vacation."
 
 # model_name can be one of ['roberta-large', 'deberta-v3-large', 'flan-t5-large']
-# lytang/MiniCheck-Flan-T5-Large will be auto-downloaded from Huggingface for the first time
+# lytang/MiniCheck-Flan-T5-Large will be auto-downloaded from Hugging Face for the first time
 scorer = MiniCheck(model_name='flan-t5-large', device=f'cuda:0', cache_dir='./ckpts')
 pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
 
