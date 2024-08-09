@@ -15,7 +15,7 @@ Please check out our work [here](https://arxiv.org/pdf/2404.10774.pdf) 📃
 
 - [2024/08] We includ one additional dataset [RAGTruth](https://arxiv.org/pdf/2401.00396) to our benchmark. We convert the dataset to the same format as in our benchmark and removed those non-checkworthy claims. 
 
-- [2024/08] A stronger model, `Bespoke-MiniCheck-7B`, is now [available](https://huggingface.co/bespokelabs/Bespoke-MiniCheck-7B) on HuggingFace for fact-checking. More details [here](https://llm-aggrefact.github.io/blog). It's the current SOTA and is commercially useable! Please contact company@bespokelabs.ai for commercial use.
+- [2024/08] A stronger model, `Bespoke-MiniCheck-7B`, is now [available](https://huggingface.co/bespokelabs/Bespoke-MiniCheck-7B) on HuggingFace for fact-checking. More details at this [blog post](https://llm-aggrefact.github.io/blog). It's the current SOTA and is commercially useable! Please contact company@bespokelabs.ai for commercial use.
 
 - [2024/08] [Demo](https://playground.bespokelabs.ai) of `Bespoke-MiniCheck-7B` with **real-time** inference!
 
@@ -50,7 +50,7 @@ The benchmark contains the following fields:
 ## *MiniCheck* Model Evaluation Demo
 
 <p align="center">
- <img src="./images/cost.png" width="360">
+ <img src="./images/cost.png" width="500">
 </p>
 
 Please first clone our GitHub Repo and install necessary packages from `requirements.txt`. 
@@ -70,7 +70,8 @@ claim_2 = "The students are on vacation."
 # model_name can be one of the followings:
 # ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B']
 
-#  MiniCheck-Flan-T5-Large (770M) is the best fack-checking model with size < 1B and reaches GPT-4 performance.
+#  MiniCheck-Flan-T5-Large (770M) is the best fack-checking model 
+# with size < 1B and reaches GPT-4 performance.
 scorer = MiniCheck(model_name='flan-t5-large', cache_dir='./ckpts')
 pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
 
