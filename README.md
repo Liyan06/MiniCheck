@@ -9,11 +9,22 @@ Please check out our work [here](https://arxiv.org/pdf/2404.10774.pdf) 📃
 </p>
 
 
+*Updates* 🔥
+
+- [2024/08] We release the [LLM-AggreFact leaderboard](https://llm-aggrefact.github.io), which currently contains the performance of 27 models on the LLM-AggreFact benchmark, including Llama-3.1, Mistral Large 2 and Claude-3.5.
+
+- [2024/08] We includ one additional dataset [RAGTruth](https://arxiv.org/pdf/2401.00396) to our benchmark. We convert the dataset to the same format as in our benchmark and removed those non-checkworthy claims. 
+
+- [2024/08] A stronger model, `Bespoke-MiniCheck-7B`, is now [available](https://huggingface.co/bespokelabs/Bespoke-MiniCheck-7B) on HuggingFace for fact-checking. More details [here](https://llm-aggrefact.github.io/blog). It's the current SOTA and is commercially useable! Please contact company@bespokelabs.ai for commercial use.
+
+- [2024/08] [Demo](https://playground.bespokelabs.ai) of `Bespoke-MiniCheck-7B` with **real-time** inference!
+
+
 ## *LLM-AggreFact* Benchmark
 
 ### Description
 
-LLM-AggreFact is a fact verification benchmark. It aggregates 10 of the most up-to-date publicly available datasets on factual consistency evaluation across both closed-book and grounded generation settings. In LLM-AggreFact:
+LLM-AggreFact is a fact verification benchmark. It aggregates 11 of the most up-to-date publicly available datasets on factual consistency evaluation across both closed-book and grounded generation settings. In LLM-AggreFact:
 1. Documents come from diverse sources, including Wikipedia paragraphs, interviews, web text, covering domains such as news, dialogue, science, and healthcare.
 2. Claims to be verified are mostly generated from recent generative models (except for one dataset of human-written claims), *without any human intervention in any format, such as injecting certain error types into model-generated claims*.
 
@@ -34,11 +45,12 @@ The benchmark contains the following fields:
 |doc| Document used to check the corresponding claim|
 |claim| Claim to be checked by the corresponding document|
 |label| 1 if the claim is supported, 0 otherwise|
+|contamination_identifier| An identification string for contamination detection |
 
 ## *MiniCheck* Model Evaluation Demo
 
 <p align="center">
-    <img src="./images/cost.png" width="360">
+ <img src="./images/cost.png" width="360">
 </p>
 
 Please first clone our GitHub Repo and install necessary packages from `requirements.txt`. 
@@ -48,27 +60,43 @@ Our MiniCheck models are available on HuggingFace 🤗 More model details can be
 
 ```python
 from minicheck.minicheck import MiniCheck
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 doc = "A group of students gather in the school library to study for their upcoming final exams."
 claim_1 = "The students are preparing for an examination."
 claim_2 = "The students are on vacation."
 
-# model_name can be one of ['roberta-large', 'deberta-v3-large', 'flan-t5-large']
-# lytang/MiniCheck-Flan-T5-Large will be auto-downloaded from Huggingface for the first time
-scorer = MiniCheck(model_name='flan-t5-large', device=f'cuda:0', cache_dir='./ckpts')
+# model_name can be one of the followings:
+# ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B']
+
+#  MiniCheck-Flan-T5-Large (770M) is the best fack-checking model with size < 1B and reaches GPT-4 performance.
+scorer = MiniCheck(model_name='flan-t5-large', cache_dir='./ckpts')
 pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
 
 print(pred_label) # [1, 0]
-print(raw_prob)   # [0.9805923700332642, 0.007121307775378227]
+print(raw_prob)   # [0.9805923700332642, 0.007121330592781305]
+
+
+# Alternatively, you can use our Bespoke-MiniCheck-7B model (7B) for evaluation. 
+# Bespoke-MiniCheck-7B is the most performant fact-checking model 
+# in the MiniCheck series AND is the current SOTA regardless of size.
+# It's also commercially useable! 
+# For commercial licensing, please contact company@bespokelabs.ai
+scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', cache_dir='./ckpts')
+pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
+
+print(pred_label) # [1, 0]
+print(raw_prob)   # [0.9840446675150499, 0.010986349594852094]
 ```
 
-A detailed walkthrough of the evaluation process on LLM-Aggrefact and replication of the results is available in this notebook: [inference-example-demo.ipynb](./inference-example-demo.ipynb).
+A detailed walkthrough of the evaluation process on LLM-Aggrefact and replication of the results is available in this notebook: [benchmark_evaluation_demo.ipynb](./benchmark_evaluation_demo.ipynb).
 
 
 ## Synthetic Data Generation 
 
 Code for generating synthetic data (both C2D and D2C methods) is available in the [`synthetic_data_gen`](./synthetic_data_gen) directory.
-Our 14K synthetic data (7K C2D and 7K D2C) used for model training is available on HuggingFace 🤗 and can be found [here](https://huggingface.co/datasets/lytang/C2D-and-D2C-MiniCheck).
+Our 14K synthetic data (7K C2D and 7K D2C) used for model training (MiniCheck-RoBERTa/DeBERTA/Flan-T5) is available on HuggingFace 🤗 and can be found [here](https://huggingface.co/datasets/lytang/C2D-and-D2C-MiniCheck).
 
 
 ## Citation

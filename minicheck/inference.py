@@ -10,6 +10,9 @@ import torch.nn as nn
 from tqdm import tqdm
 import torch.nn.functional as F
 import os
+from vllm import LLM, SamplingParams
+from minicheck.utils import SYSTEM_PROMPT, USER_PROMPT
+from typing import List
 
 
 def sent_tokenize_with_newlines(text):
@@ -25,10 +28,9 @@ def sent_tokenize_with_newlines(text):
 
 
 class Inferencer():
-    def __init__(self, model_name, device, max_input_length, batch_size, cache_dir) -> None:
+    def __init__(self, model_name, max_input_length, batch_size, cache_dir) -> None:
         
         self.model_name = model_name
-        self.device = device
 
         if cache_dir is not None:
             if not os.path.exists(cache_dir):
@@ -36,7 +38,7 @@ class Inferencer():
 
         if model_name == 'flan-t5-large':
             ckpt = 'lytang/MiniCheck-Flan-T5-Large'
-            self.model = AutoModelForSeq2SeqLM.from_pretrained(ckpt, cache_dir=cache_dir).to(self.device)
+            self.model = AutoModelForSeq2SeqLM.from_pretrained(ckpt, cache_dir=cache_dir, device_map="auto")
             self.tokenizer = AutoTokenizer.from_pretrained(ckpt, cache_dir=cache_dir)
 
             self.max_input_length=2048 if max_input_length is None else max_input_length
@@ -59,7 +61,7 @@ class Inferencer():
 
             self.tokenizer = AutoTokenizer.from_pretrained(ckpt, use_fast=True, revision='main', token=None, cache_dir=cache_dir)
             self.model = AutoModelForSequenceClassification.from_pretrained(
-                ckpt, config=config, revision='main', token=None, ignore_mismatched_sizes=False, cache_dir=cache_dir).to(self.device)
+                ckpt, config=config, revision='main', token=None, ignore_mismatched_sizes=False, cache_dir=cache_dir, device_map="auto")
         
         self.model.eval()
         self.batch_size = batch_size
@@ -189,13 +191,13 @@ class Inferencer():
 
         for mini_batch_input, batch_org_chunk in zip(batch_input, batch_org_chunks):
 
-            mini_batch_input = {k: v.to(self.device) for k, v in mini_batch_input.items()}
+            mini_batch_input = {k: v.to(self.model.device) for k, v in mini_batch_input.items()}
 
             with torch.no_grad():
 
                 if self.model_name == 'flan-t5-large':
                     
-                    decoder_input_ids = torch.zeros((mini_batch_input['input_ids'].size(0), 1), dtype=torch.long).to(self.device)
+                    decoder_input_ids = torch.zeros((mini_batch_input['input_ids'].size(0), 1), dtype=torch.long).to(self.model.device)
                     outputs = self.model(input_ids=mini_batch_input['input_ids'], attention_mask=mini_batch_input['attention_mask'], decoder_input_ids=decoder_input_ids)
                     logits = outputs.logits.squeeze(1)
 
@@ -266,3 +268,168 @@ class Inferencer():
 
         outputs = self.inference_example_batch(doc, claim)
         return outputs['max_support_probs'], outputs['used_chunks'], outputs['support_prob_per_chunk']
+
+
+class LLMCheck:
+
+    def __init__(self, model_id, tensor_parallel_size=1, max_tokens=1, cache_dir=None):
+
+        import logging
+        logging.basicConfig(
+            level=logging.INFO,  
+            format='%(asctime)s [%(levelname)s] %(message)s',
+            handlers=[
+                logging.StreamHandler()
+            ]
+        )
+
+        logging.info("Reminder: Please set the CUDA device before initializing the LLMCheck object.")
+
+        if model_id == 'Bespoke-MiniCheck-7B':
+            self.model_id = 'bespokelabs/Bespoke-MiniCheck-7B'
+        else:
+            raise ValueError("model_id must be 'Bespoke-MiniCheck-7B'")
+
+        self.tensor_parallel_size = tensor_parallel_size
+        self.max_tokens = max_tokens
+        self.default_chunk_size = 32000
+        self.cache_dir = cache_dir
+
+        self.user_prompt = USER_PROMPT
+        self.system_prompt = SYSTEM_PROMPT
+        
+        self.llm = LLM(
+            model=self.model_id, 
+            dtype=torch.bfloat16, 
+            download_dir=self.cache_dir,
+            trust_remote_code=True if self.model_id == 'bespokelabs/Bespoke-MiniCheck-7B' else False,
+            tensor_parallel_size=self.tensor_parallel_size,
+            seed=2024,
+            max_model_len=32768,
+        )
+
+        self.tokenizer = self.llm.get_tokenizer()
+        self.tokenizer.padding_side = "left"
+        terminators = [
+            self.tokenizer.eos_token_id,
+            self.tokenizer.convert_tokens_to_ids("<|eot_id|>")
+        ]
+        self.sampling_params = SamplingParams(
+            temperature=0,
+            max_tokens=self.max_tokens,
+            stop_token_ids=terminators,
+            logprobs=5
+        )
+
+
+    def sent_tokenize_with_newlines(self, text):
+        blocks = text.split('\n')
+        
+        tokenized_blocks = [sent_tokenize(block) for block in blocks]
+        tokenized_text = []
+        for block in tokenized_blocks:
+            tokenized_text.extend(block)
+            tokenized_text.append('\n')  
+
+        return tokenized_text[:-1] 
+    
+
+    def apply_chat_template(self, doc, claim):
+
+        user_prompt = self.user_prompt.replace("[DOCUMENT]", doc).replace("[CLAIM]", claim)
+        message = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        text = self.tokenizer.apply_chat_template(message, add_generation_prompt=True, tokenize=False)
+
+        return text
+
+    
+    def get_support_prob(self, response):
+        """probs from vllm inference"""
+        import math
+        support_prob = 0
+
+        for token_prob in response.outputs[0].logprobs[0].values():
+            decoded_token = token_prob.decoded_token
+            if decoded_token.lower() == 'yes': 
+                support_prob += math.exp(token_prob.logprob)
+        
+        return support_prob
+
+
+    def get_all_chunks_per_doc(self, doc, claim):
+    
+        def chunks(lst, n):
+            """Yield successive chunks from lst with each having approximately n tokens.
+            """
+            current_chunk = []
+            current_word_count = 0
+            for sentence in lst:
+                sentence_word_count = len(self.tokenizer(sentence, add_special_tokens=False)['input_ids'])
+                if current_word_count + sentence_word_count > n:
+                    yield ' '.join(current_chunk)
+                    current_chunk = [sentence]
+                    current_word_count = sentence_word_count
+                else:
+                    current_chunk.append(sentence)
+                    current_word_count += sentence_word_count
+            if current_chunk:
+                yield ' '.join(current_chunk)
+
+        doc_sents = self.sent_tokenize_with_newlines(doc)
+        doc_sents = doc_sents or ['']
+
+        doc_chunks = [chunk.replace(" \n ", '\n').strip() for chunk in chunks(doc_sents, self.chunk_size)]
+        doc_chunks = [chunk for chunk in doc_chunks if chunk != '']
+
+        if len(doc_chunks) == 0:
+            doc_chunks = [''] 
+
+        claim_repeat = [claim] * len(doc_chunks)
+
+        return {'doc_chunks': doc_chunks, 'claim_repeat': claim_repeat}
+
+
+    def score(self, docs: List[str], claims: List[str], chunk_size=None) -> List[float]:
+
+        self.chunk_size = chunk_size if chunk_size else self.default_chunk_size
+
+        all_prompts = []
+        doc_claim_indices = []
+        for index, (doc, claim) in enumerate(zip(docs, claims)):
+            chunks = self.get_all_chunks_per_doc(doc, claim)
+            doc_chunks = chunks['doc_chunks']
+            claim_repeat = chunks['claim_repeat']
+
+            prompts = [self.apply_chat_template(doc_chunk, claim) for doc_chunk, claim in zip(doc_chunks, claim_repeat)]
+            all_prompts.extend(prompts)
+            doc_claim_indices.extend([index] * len(prompts))
+
+        responses = self.llm.generate(
+            all_prompts, 
+            self.sampling_params,
+        ) 
+        probs_per_chunk = [self.get_support_prob(responses[idx]) for idx in range(len(responses))]
+
+        result_dict = {}
+        for index, prob_per_chunk in zip(doc_claim_indices, probs_per_chunk):
+            if index not in result_dict:
+                result_dict[index] = []
+            result_dict[index].append(prob_per_chunk)
+
+        probs_per_doc_claim_pair = [result_dict[index] for index in range(len(docs))] 
+        pred_label, max_support_prob, used_chunk, support_prob_per_chunk = [], [], [], []
+        
+        for idx in range(len(probs_per_doc_claim_pair)):
+            
+            doc = docs[idx]
+            claim = claims[idx]
+
+            pred_label.append(1 if max(probs_per_doc_claim_pair[idx]) > 0.5 else 0)
+            max_support_prob.append(max(probs_per_doc_claim_pair[idx]))
+            used_chunk.append(self.get_all_chunks_per_doc(doc, claim)['doc_chunks'])
+            support_prob_per_chunk.append(probs_per_doc_claim_pair[idx])
+        
+        return pred_label, max_support_prob, used_chunk, support_prob_per_chunk
