@@ -272,7 +272,7 @@ class Inferencer():
 
 class LLMCheck:
 
-    def __init__(self, model_id, tensor_parallel_size=1, max_tokens=1, cache_dir=None):
+    def __init__(self, model_id, tensor_parallel_size=1, max_tokens=1, cache_dir=None, enable_prefix_caching=False):
 
         import logging
         logging.basicConfig(
@@ -297,6 +297,7 @@ class LLMCheck:
 
         self.user_prompt = USER_PROMPT
         self.system_prompt = SYSTEM_PROMPT
+        self.enable_prefix_caching = enable_prefix_caching
         
         self.llm = LLM(
             model=self.model_id, 
@@ -306,6 +307,7 @@ class LLMCheck:
             tensor_parallel_size=self.tensor_parallel_size,
             seed=2024,
             max_model_len=32768,
+            enable_prefix_caching=self.enable_prefix_caching
         )
 
         self.tokenizer = self.llm.get_tokenizer()

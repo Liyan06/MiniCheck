@@ -9,7 +9,7 @@ import numpy as np
 
 
 class MiniCheck:
-    def __init__(self, model_name='Bespoke-MiniCheck-7B', max_input_length=None, batch_size=16, cache_dir=None, tensor_parallel_size=1, max_tokens=1) -> None:
+    def __init__(self, model_name='Bespoke-MiniCheck-7B', max_input_length=None, batch_size=16, cache_dir=None, tensor_parallel_size=1, max_tokens=1, enable_prefix_caching=False) -> None:
 
         '''
         Model Options: 
@@ -23,6 +23,9 @@ class MiniCheck:
         Throughput:
         We automatically speedup Bespoke-MiniCheck-7B inference with vLLM. Based on our test on a single A6000 (48 VRAM), 
         both Bespoke-MiniCheck-7B with vLLM and MiniCheck-Flan-T5-Large have throughputs > 500 docs/min.
+
+        Automatic Prefix Caching for Bespoke-MiniCheck-7B:
+        If you use the same document to fact-check different claims, APC allows vLLM to process the document only once, and all future claims can avoid recomputing this document by reusing its KV cache. This allows vLLM to serve future grounded fact-checking with much higher throughput and much lower latency.
         '''
 
         assert model_name in ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B'], \
@@ -42,6 +45,7 @@ class MiniCheck:
                 tensor_parallel_size=tensor_parallel_size,
                 max_tokens=max_tokens,
                 cache_dir=cache_dir,
+                enable_prefix_caching=enable_prefix_caching
             )
         
 
@@ -93,7 +97,7 @@ if __name__ == '__main__':
     # bespokelabs/Bespoke-MiniCheck-7B will be auto-downloaded from Huggingface for the first time
     # Bespoke-MiniCheck-7B is the most performant fact-checking model in the MiniCheck series AND
     # it outperforms ALL exisiting specialized fact-checkers and off-the-shelf LLMs regardless of size.
-    scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', cache_dir='./ckpts')
+    scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', enable_prefix_caching=False, cache_dir='./ckpts')
     pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
 
     print(pred_label) # [1, 0]

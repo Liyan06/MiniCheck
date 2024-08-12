@@ -84,7 +84,7 @@ print(raw_prob)   # [0.9805923700332642, 0.007121330592781305]
 # in the MiniCheck series AND is the current SOTA regardless of size.
 # It's also commercially useable! 
 # For commercial licensing, please contact company@bespokelabs.ai
-scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', cache_dir='./ckpts')
+scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', enable_prefix_caching=False, cache_dir='./ckpts')
 pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
 
 print(pred_label) # [1, 0]
@@ -92,6 +92,32 @@ print(raw_prob)   # [0.9840446675150499, 0.010986349594852094]
 ```
 
 A detailed walkthrough of the evaluation process on LLM-Aggrefact and replication of the results is available in this notebook: [benchmark_evaluation_demo.ipynb](./benchmark_evaluation_demo.ipynb).
+
+## Automatic Prefix Caching ([More Info](https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html))
+
+> Automatic Prefix Caching (APC in short) caches the KV cache of existing queries, so that a new query can directly reuse the KV cache if it shares the same prefix with one of the existing queries, allowing the new query to skip the computation of the shared part.
+
+If you use the same document to fact-check different claims, APC allows vLLM to process the document only once, and all future claims can avoid recomputing this document by reusing its KV cache. This allows vLLM to serve future grounded fact-checking with much higher throughput and much lower latency.
+
+To enable automatic prefix caching for `Bespoke-MiniCheck-7B`, simply set `enable_prefix_caching=True` when initializing the MiniCheck model (no other changes are needed).:
+
+```python
+scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', enable_prefix_caching=True, cache_dir='./ckpts')
+```
+
+### Throughput
+
+For some datasets in LLM-AggreFact, the grounded documents are repeatedly used, such as TofuEval-MediaS/MeetB, LFQA, and RAGTruth. Hence, we test the throughput of MiniCheck before and after APC is enabled. Results show that the inference time on the 29K test set is 30 mins and 53 mins with and without APC enabled, respectively, on a single NVIDIA A6000 (48 GB VRAM).
+
+### Performance
+
+We compare the benchmark performance of `Bespoke-MiniCheck-7B` with (bottom) and without (top) APC enabled. Performance varies slightly across different datasets, but the overall average is the same. Please decide whether to enable APC based on your specific use case.
+
+<p align="center">
+    <img src="./images/caching_or_not.png" width="360">
+</p>
+
+
 
 
 ## Synthetic Data Generation 
