@@ -17,6 +17,8 @@ Please check out our work [here](https://arxiv.org/pdf/2404.10774.pdf) 📃
 
 - [2024/08] A stronger model, `Bespoke-MiniCheck-7B`, is now [available](https://huggingface.co/bespokelabs/Bespoke-MiniCheck-7B) on HuggingFace for fact-checking. More details at this [blog post](https://llm-aggrefact.github.io/blog). It's the current SOTA and is commercially useable! Please contact company@bespokelabs.ai for commercial use.
 
+- [2024/08] We enable [automic prefix caching](https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html) for much faster inference when repeatedly using the same document for fact-checking.
+
 - [2024/08] [Demo](https://playground.bespokelabs.ai) of `Bespoke-MiniCheck-7B` with **real-time** inference!
 
 
@@ -107,14 +109,14 @@ scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', enable_prefix_caching=True
 
 ### Throughput
 
-For some datasets in LLM-AggreFact, the grounded documents are repeatedly used, such as TofuEval-MediaS/MeetB, LFQA, and RAGTruth. Hence, we test the throughput of MiniCheck before and after APC is enabled. Results show that the inference time on the 29K test set is 30 mins and 53 mins with and without APC enabled, respectively, on a single NVIDIA A6000 (48 GB VRAM).
+For some datasets in LLM-AggreFact, the grounded documents are repeatedly used, such as TofuEval-MediaS/MeetB, LFQA, and RAGTruth. Hence, we test the throughput of MiniCheck before and after APC is enabled. Results show that the inference time on the 29K test set is 30 mins and 55 mins with and without APC enabled, respectively, on a single NVIDIA A6000 (48 GB VRAM).
 
 ### Performance
 
 We compare the benchmark performance of `Bespoke-MiniCheck-7B` with (bottom) and without (top) APC enabled. Performance varies slightly across different datasets, but the overall average is the same. Please decide whether to enable APC based on your specific use case.
 
 <p align="center">
-    <img src="./images/caching_or_not.png" width="360">
+    <img src="./images/caching_or_not.png" width="500">
 </p>
 
 
