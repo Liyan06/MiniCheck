@@ -380,12 +380,15 @@ class LLMCheck:
             if current_chunk:
                 yield ' '.join(current_chunk)
 
-        doc_sents = self.sent_tokenize_with_newlines(doc)
-        doc_sents = doc_sents or ['']
-
-        doc_chunks = [chunk.replace(" \n ", '\n').strip() for chunk in chunks(doc_sents, self.chunk_size)]
-        doc_chunks = [chunk for chunk in doc_chunks if chunk != '']
-
+        if doc in self.doc_chunk_cache:
+            doc_chunks = self.doc_chunk_cache[doc]
+        else:
+            doc_sents = self.sent_tokenize_with_newlines(doc)
+            doc_sents = doc_sents or ['']
+    
+            doc_chunks = [chunk.replace(" \n ", '\n').strip() for chunk in chunks(doc_sents, self.chunk_size)]
+            doc_chunks = [chunk for chunk in doc_chunks if chunk != '']
+            self.doc_chunk_cache[doc] = doc_chunks
         if len(doc_chunks) == 0:
             doc_chunks = [''] 
 
@@ -396,6 +399,7 @@ class LLMCheck:
 
     def score(self, docs: List[str], claims: List[str], chunk_size=None) -> List[float]:
 
+        self.doc_chunk_cache = {}
         self.chunk_size = chunk_size if chunk_size else self.default_chunk_size
 
         all_prompts = []
