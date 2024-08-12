@@ -113,7 +113,7 @@ For some datasets in LLM-AggreFact, the grounded documents are repeatedly used, 
 
 ### Performance
 
-We compare the benchmark performance of `Bespoke-MiniCheck-7B` with (bottom) and without (top) APC enabled. Performance varies slightly across different datasets, but the overall average is the same. Please decide whether to enable APC based on your specific use case.
+We compare the benchmark performance of `Bespoke-MiniCheck-7B` with APC enabled (top) and disabled (bottom).  Performance varies slightly across different datasets, but the overall average is the same. Please decide whether to enable APC based on your specific use case.
 
 <p align="center">
     <img src="./images/caching_or_not.png" width="500">

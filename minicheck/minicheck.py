@@ -25,7 +25,9 @@ class MiniCheck:
         both Bespoke-MiniCheck-7B with vLLM and MiniCheck-Flan-T5-Large have throughputs > 500 docs/min.
 
         Automatic Prefix Caching for Bespoke-MiniCheck-7B:
-        If you use the same document to fact-check different claims, APC allows vLLM to process the document only once, and all future claims can avoid recomputing this document by reusing its KV cache. This allows vLLM to serve future grounded fact-checking with much higher throughput and much lower latency.
+        If you use the same document to fact-check different claims, APC allows vLLM to process the document only once, 
+        and all future claims can avoid recomputing this document by reusing its KV cache. This allows vLLM to serve 
+        future grounded fact-checking with much higher throughput and much lower latency.
         '''
 
         assert model_name in ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B'], \
