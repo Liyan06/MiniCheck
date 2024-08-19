@@ -1,8 +1,5 @@
 # Adapt code from https://github.com/yuh-zha/AlignScore/tree/main
 
-import sys
-sys.path.append("..")
-
 from nltk.tokenize import sent_tokenize
 import torch
 from transformers import AutoConfig, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForSequenceClassification
@@ -10,7 +7,6 @@ import torch.nn as nn
 from tqdm import tqdm
 import torch.nn.functional as F
 import os
-from vllm import LLM, SamplingParams
 from minicheck.utils import SYSTEM_PROMPT, USER_PROMPT
 from typing import List
 
@@ -273,6 +269,7 @@ class Inferencer():
 class LLMCheck:
 
     def __init__(self, model_id, tensor_parallel_size=1, max_tokens=1, cache_dir=None, enable_prefix_caching=False):
+        from vllm import LLM, SamplingParams
 
         import logging
         logging.basicConfig(

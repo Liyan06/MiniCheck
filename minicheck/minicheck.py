@@ -1,8 +1,5 @@
 # Adapt code from https://github.com/yuh-zha/AlignScore/tree/main
 
-import sys
-sys.path.append("..")
-
 from minicheck.inference import Inferencer, LLMCheck
 from typing import List
 import numpy as np
