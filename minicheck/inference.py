@@ -295,10 +295,27 @@ class LLMCheck:
         self.user_prompt = USER_PROMPT
         self.system_prompt = SYSTEM_PROMPT
         self.enable_prefix_caching = enable_prefix_caching
+
+        # Check if CUDA is available and get compute capability
+        if torch.cuda.is_available():
+            compute_capability = torch.cuda.get_device_capability()
+            if compute_capability[0] >= 8:
+                self.dtype = torch.bfloat16
+                logging.info("Using bfloat16 for LLM initialization.")
+            else:
+                self.dtype = torch.float16
+                logging.info(f"GPU compute capability {compute_capability} < 8.0. Using float16 for LLM initialization.")
+        else:
+            if torch.cpu.is_available() and hasattr(torch.cpu, 'is_bf16_supported') and torch.cpu.is_bf16_supported():
+                self.dtype = torch.bfloat16
+                logging.info("CUDA not available. Using bfloat16 on CPU.")
+            else:
+                self.dtype = torch.float32
+                logging.info("CUDA not available and CPU doesn't support bfloat16. Using float32 for LLM initialization.")
         
         self.llm = LLM(
             model=self.model_id, 
-            dtype=torch.bfloat16, 
+            dtype=self.dtype, 
             download_dir=self.cache_dir,
             trust_remote_code=True if self.model_id == 'bespokelabs/Bespoke-MiniCheck-7B' else False,
             tensor_parallel_size=self.tensor_parallel_size,
