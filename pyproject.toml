@@ -2,7 +2,7 @@
 name = "minicheck"
 version = "0.1.0"
 authors = [
-  { name="Liyan Tang", email="lytang@utexas.edu" },
+  { name="Liyan Tang", email="lytang06@gmail.com" },
 ]
 description = "MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents"
 readme = "README.md"
