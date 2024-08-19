@@ -57,12 +57,15 @@ The benchmark contains the following fields:
 
 ### Installation
 
-Please clone our GitHub Repo and install necessary packages (see [requirements.txt](./requirements.txt)) using one of the following commands in your terminal:
+The following command will install the **MiniCheck package** and all necessary dependencies.
 
 ```sh
 pip install "minicheck @ git+https://github.com/Liyan06/MiniCheck.git@main"
+```
 
-# or with optional vllm dependency for inference of LLM-based MiniCheck model `Bespoke-MiniCheck-7B` (Linux only)
+or with optional vllm dependency for inference of LLM-based MiniCheck model `Bespoke-MiniCheck-7B` (Linux only)
+
+```sh
 pip install "minicheck[llm] @ git+https://github.com/Liyan06/MiniCheck.git@main"
 ```
 

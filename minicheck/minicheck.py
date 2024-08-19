@@ -79,25 +79,3 @@ class MiniCheck:
     
     def _score_llmcheck(self, docs, claims, chunk_size):
         return self.model.score(docs, claims, chunk_size)
-    
-
-if __name__ == '__main__':
-
-    import os
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
-    doc = "A group of students gather in the school library to study for their upcoming final exams."
-    claim_1 = "The students are preparing for an examination."
-    claim_2 = "The students are on vacation."
-
-    # model_name can be one of:
-    # ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B']
-
-    # bespokelabs/Bespoke-MiniCheck-7B will be auto-downloaded from Huggingface for the first time
-    # Bespoke-MiniCheck-7B is the most performant fact-checking model in the MiniCheck series AND
-    # it outperforms ALL exisiting specialized fact-checkers and off-the-shelf LLMs regardless of size.
-    scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', enable_prefix_caching=False, cache_dir='./ckpts')
-    pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
-
-    print(pred_label) # [1, 0]
-    print(raw_prob)   # [0.9840446675150499, 0.010986349594852094]
