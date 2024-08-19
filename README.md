@@ -55,7 +55,16 @@ The benchmark contains the following fields:
  <img src="./images/cost.png" width="500">
 </p>
 
-Please first clone our GitHub Repo and install necessary packages from `requirements.txt`. 
+Install MiniCheck as follows:
+
+```sh
+pip install "git+https://github.com/Liyan06/MiniCheck.git@main#egg=minicheck"
+
+# or with optional vllm dependency for inference of LLM-based model (Linux only)
+pip install "git+https://github.com/Liyan06/MiniCheck.git@main#egg=minicheck[llm]"
+```
+
+Alternatively, clone our GitHub Repo and install necessary packages from `requirements.txt`.
 
 Our MiniCheck models are available on HuggingFace 🤗 More model details can be found from this [collection](https://huggingface.co/collections/lytang/minicheck-and-llm-aggrefact-661c5d387082ad0b433dec65). Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Huggingface for the first time and cached in the specified directory.
 
