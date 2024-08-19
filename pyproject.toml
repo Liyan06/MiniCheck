@@ -13,6 +13,15 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+dependencies = [
+    "torch",
+    "transformers",
+    "datasets",
+    "nltk",
+    "pandas",
+    "numpy",
+    "openai"
+]
 
 [project.optional-dependencies]
 llm = ["vllm"]
