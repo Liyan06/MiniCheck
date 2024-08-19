@@ -1,4 +1,19 @@
-ckpts/
+/home/lytang/MiniCheck/.gitignore
+/home/lytang/MiniCheck/minicheck/__pycache__
+/home/lytang/MiniCheck/__pycache__
+synthetic_data_gen/__pycache__
+minicheck/__pycache__
+
+/home/lytang/MiniCheck/ckpts/
+/home/lytang/MiniCheck/preds/
+
+/home/lytang/MiniCheck/preds
+/home/lytang/MiniCheck/ckpts
+
+/home/lytang/MiniCheck/gpt-4o.log
+
+*.log
+
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
