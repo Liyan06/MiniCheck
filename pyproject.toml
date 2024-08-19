@@ -1,0 +1,29 @@
+[project]
+name = "minicheck"
+version = "0.1.0"
+authors = [
+  { name="Liyan Tang", email="lytang@utexas.edu" },
+]
+description = "MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    'License :: OSI Approved :: Apache Software License',
+    "Operating System :: OS Independent",
+]
+
+
+[project.optional-dependencies]
+llm = ["vllm"]
+
+[tool.setuptools]
+packages = ["minicheck"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+Homepage = "https://github.com/Liyan06/MiniCheck"
+Issues = "https://github.com/Liyan06/MiniCheck/issues"
