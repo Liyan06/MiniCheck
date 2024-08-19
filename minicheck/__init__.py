@@ -1,6 +1,6 @@
 import nltk
 
 try:
-    nltk.data.find('punkt_tab')
+    nltk.data.find('tokenizers/punkt')
 except LookupError:
-    nltk.download('punkt_tab')
+    nltk.download('punkt')
