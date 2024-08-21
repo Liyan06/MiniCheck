@@ -417,6 +417,9 @@ class LLMCheck:
         self.doc_chunk_cache = {}
         self.chunk_size = chunk_size if chunk_size else self.default_chunk_size
 
+        assert self.chunk_size < self.max_model_len, \
+            "chunk_size must be less than max_model_len so that MiniCheck can process the claim"
+
         all_prompts = []
         doc_claim_indices = []
         for index, (doc, claim) in enumerate(zip(docs, claims)):
