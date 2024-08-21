@@ -24,7 +24,7 @@ def sent_tokenize_with_newlines(text):
 
 
 class Inferencer():
-    def __init__(self, model_name, max_input_length, batch_size, cache_dir) -> None:
+    def __init__(self, model_name, max_model_len, batch_size, cache_dir) -> None:
         
         self.model_name = model_name
 
@@ -37,17 +37,17 @@ class Inferencer():
             self.model = AutoModelForSeq2SeqLM.from_pretrained(ckpt, cache_dir=cache_dir, device_map="auto")
             self.tokenizer = AutoTokenizer.from_pretrained(ckpt, cache_dir=cache_dir)
 
-            self.max_input_length=2048 if max_input_length is None else max_input_length
+            self.max_model_len=2048 if max_model_len is None else max_model_len
             self.max_output_length = 256
         
         else:
             if model_name == 'roberta-large':
                 ckpt = 'lytang/MiniCheck-RoBERTa-Large'
-                self.max_input_length=512 if max_input_length is None else max_input_length
+                self.max_model_len=512 if max_model_len is None else max_model_len
 
             elif model_name == 'deberta-v3-large':
                 ckpt = 'lytang/MiniCheck-DeBERTa-v3-Large'
-                self.max_input_length=2048 if max_input_length is None else max_input_length
+                self.max_model_len=2048 if max_model_len is None else max_model_len
                 
             else:
                 raise ValueError(f"Unsupported model: {model_name}")
@@ -122,7 +122,7 @@ class Inferencer():
                 for sentence in lst:
                     sentence_word_count = len(self.tokenizer(
                         sentence, padding=False, add_special_tokens=False, 
-                        max_length=self.max_input_length, truncation=True)['input_ids'])
+                        max_length=self.max_model_len, truncation=True)['input_ids'])
                     if current_token_count + sentence_word_count > n:
                         yield ' '.join(current_chunk)
                         current_chunk = [sentence]
@@ -236,7 +236,7 @@ class Inferencer():
             if self.model_name == 'flan-t5-large':
                 model_inputs = self.tokenizer(
                     ['predict: ' + text for text in mini_batch], 
-                    max_length=self.max_input_length, 
+                    max_length=self.max_model_len, 
                     truncation=True, 
                     padding=True, 
                     return_tensors="pt"
@@ -244,7 +244,7 @@ class Inferencer():
             else:
                 model_inputs = self.tokenizer(
                     [text for text in mini_batch], 
-                    max_length=self.max_input_length, 
+                    max_length=self.max_model_len, 
                     truncation=True, 
                     padding=True, 
                     return_tensors="pt"
@@ -268,7 +268,7 @@ class Inferencer():
 
 class LLMCheck:
 
-    def __init__(self, model_id, tensor_parallel_size=1, max_tokens=1, cache_dir=None, enable_prefix_caching=False):
+    def __init__(self, model_id, tensor_parallel_size=1, max_tokens=1, cache_dir=None, enable_prefix_caching=False, max_model_len=None):
         from vllm import LLM, SamplingParams
 
         import logging
@@ -289,7 +289,8 @@ class LLMCheck:
 
         self.tensor_parallel_size = tensor_parallel_size
         self.max_tokens = max_tokens
-        self.default_chunk_size = 32000
+        self.max_model_len = 32768 if max_model_len is None else max_model_len # max input length (prompt + doc)
+        self.default_chunk_size = self.max_model_len - 300 # reserve some space (hard coded) for the claim to be checked
         self.cache_dir = cache_dir
 
         self.user_prompt = USER_PROMPT
@@ -320,7 +321,7 @@ class LLMCheck:
             trust_remote_code=True if self.model_id == 'bespokelabs/Bespoke-MiniCheck-7B' else False,
             tensor_parallel_size=self.tensor_parallel_size,
             seed=2024,
-            max_model_len=32768,
+            max_model_len=self.max_model_len,   # need to be adjusted based on the GPU memory available
             enable_prefix_caching=self.enable_prefix_caching
         )
 

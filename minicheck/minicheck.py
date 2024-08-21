@@ -6,11 +6,52 @@ import numpy as np
 
 
 class MiniCheck:
-    def __init__(self, model_name='Bespoke-MiniCheck-7B', max_input_length=None, batch_size=16, cache_dir=None, tensor_parallel_size=1, max_tokens=1, enable_prefix_caching=False) -> None:
+    def __init__(self, model_name='Bespoke-MiniCheck-7B', max_model_len=None, batch_size=16, cache_dir=None, tensor_parallel_size=1, max_tokens=1, enable_prefix_caching=False) -> None:
 
         '''
-        Model Options: 
-        We have 5 models available for MiniCheck.
+        Parameters:
+        -----------
+        model_name : str, optional (default='Bespoke-MiniCheck-7B')
+            The name of the model to use. Options are:
+            - 'roberta-large'
+            - 'deberta-v3-large'
+            - 'flan-t5-large'
+            - 'Bespoke-MiniCheck-7B'
+            Note: 'Bespoke-MiniCheck-7B' is the most performant fact-checking model in the MiniCheck series.
+        
+        max_model_len : int or None, optional (default=None)
+            The maximum input length for the model. If None, we use the following default values. 
+                - 'roberta-large'
+                    Default: 512
+                - 'deberta-v3-large'
+                    Default: 2048
+                - 'flan-t5-large'
+                    Default: 2048
+                - 'Bespoke-MiniCheck-7B'
+                    Default: 32768
+            For 'Bespoke-MiniCheck-7B', if you have a GPU with low VRAM and get the following:
+                "ValueError: The model's max seq len (XXXX) is larger than the maximum number of 
+                tokens that can be stored in KV cache (YYYY). Try increasing `gpu_memory_utilization` 
+                or decreasing `max_model_len` when initializing the engine."
+            Please consider setting `max_model_len` to a smaller value, recommendation would be a value
+            slightly less than based on observations.
+
+        batch_size : int, optional (default=16)
+            The batch size for inference. Only applicable for non-LLM-based MiniCheck models.
+            'Bespoke-MiniCheck-7B' automatically use dynamic batching.
+
+        cache_dir : str or None, optional (default=None)
+            The directory to cache the model. If None, the default cache directory is used.
+
+        tensor_parallel_size : int, optional (default=1)
+            The number of GPUs to use for inference. Only applicable for 'Bespoke-MiniCheck-7B'.
+
+        max_tokens : int, optional (default=1)
+            The maximum number of tokens to generate. Only applicable for 'Bespoke-MiniCheck-7B'.
+
+        enable_prefix_caching : bool, optional (default=False)
+            Whether to enable prefix caching for 'Bespoke-MiniCheck-7B'. This can improve performance
+            when using the same document chunk to fact-check different claims.
 
         Note:
         (1) MiniCheck-Flan-T5-Large (770M) is the best fack-checking model with size < 1B and reaches GPT-4 performance.
@@ -35,7 +76,7 @@ class MiniCheck:
             self.model = Inferencer(
                 model_name=model_name, 
                 batch_size=batch_size, 
-                max_input_length=max_input_length,
+                max_model_len=max_model_len,
                 cache_dir=cache_dir
             )
         elif model_name == 'Bespoke-MiniCheck-7B':
@@ -44,16 +85,33 @@ class MiniCheck:
                 tensor_parallel_size=tensor_parallel_size,
                 max_tokens=max_tokens,
                 cache_dir=cache_dir,
-                enable_prefix_caching=enable_prefix_caching
+                enable_prefix_caching=enable_prefix_caching,
+                max_model_len=max_model_len
             )
         
 
     def score(self, docs: List[str], claims: List[str], chunk_size=None) -> List[float]:
         '''
-        pred_labels: 0 / 1 (0: unsupported, 1: supported)
-        max_support_probs: the probability of "supported" for the chunk that determin the final pred_label
-        used_chunks: divided chunks of the input document
-        support_prob_per_chunk: the probability of "supported" for each chunk
+        Parameters:
+        -----------
+        chunk_size : int or None, optional (default=None)
+            The size of the chunk for long documents. The document will be splitted in to
+            chunks of size chunk_size. If None, the default chunk size is used.
+            - 'roberta-large'
+                Default: 400
+            - 'deberta-v3-large'
+                Default: 400
+            - 'flan-t5-large'
+                Default: 500
+            - 'Bespoke-MiniCheck-7B'
+                Default: 32768-300
+
+        Returns:
+        -----------
+        pred_labels : 0 / 1 (0: unsupported, 1: supported)
+        max_support_probs : the probability of "supported" for the chunk that determin the final pred_label
+        used_chunks : divided chunks of the input document
+        support_prob_per_chunk : the probability of "supported" for each chunk
         '''
 
         assert isinstance(docs, list) or isinstance(docs, np.ndarray), "docs must be a list or np.ndarray"
