@@ -11,6 +11,8 @@ Please check out our work [here](https://arxiv.org/pdf/2404.10774.pdf) 📃
 
 *Updates* 🔥
 
+- [2024/08] A notebook for using MiniCheck is available [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1s-5TYnGV3kGFMLp798r5N-FXPD8lt2dm?usp=sharing)
+
 - [2024/08] We release the [LLM-AggreFact leaderboard](https://llm-aggrefact.github.io), which currently contains the performance of 27 models on the LLM-AggreFact benchmark, including Llama-3.1, Mistral Large 2 and Claude-3.5.
 
 - [2024/08] We includ one additional dataset [RAGTruth](https://arxiv.org/pdf/2401.00396) to our benchmark. We convert the dataset to the same format as in our benchmark and removed those non-checkworthy claims. 
