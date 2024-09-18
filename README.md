@@ -11,6 +11,10 @@ Please check out our work [here](https://arxiv.org/pdf/2404.10774.pdf) 📃
 
 *Updates* 🔥
 
+- [2024/09] MiniCheck is now [available](https://ollama.com/library/bespoke-minicheck) at [ollama](https://ollama.com). You can now run MiniCheck locally on your laptop 💻 with a simplt command! More info in the ollama [blog post](https://ollama.com/blog/reduce-hallucinations-with-bespoke-minicheck) and [tweet](https://x.com/ollama/status/1836449420092821731?s=61).
+
+- [2024/09] MiniCheck is now available as a [validator](https://hub.guardrailsai.com) at [Guardrails AI](https://www.guardrailsai.com).
+
 - [2024/08] A notebook for using MiniCheck is available [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1s-5TYnGV3kGFMLp798r5N-FXPD8lt2dm?usp=sharing)
 
 - [2024/08] We release the [LLM-AggreFact leaderboard](https://llm-aggrefact.github.io), which currently contains the performance of 27 models on the LLM-AggreFact benchmark, including Llama-3.1, Mistral Large 2 and Claude-3.5.
