@@ -11,7 +11,7 @@ Please check out our work [here](https://arxiv.org/pdf/2404.10774.pdf) 📃
 
 *Updates* 🔥
 
-- [2024/09] MiniCheck is now [available](https://ollama.com/library/bespoke-minicheck) at [ollama](https://ollama.com). You can now run MiniCheck locally on your laptop 💻 with a simplt command! More info in the ollama [blog post](https://ollama.com/blog/reduce-hallucinations-with-bespoke-minicheck) and [tweet](https://x.com/ollama/status/1836449420092821731?s=61).
+- [2024/09] MiniCheck is now [available](https://ollama.com/library/bespoke-minicheck) at [ollama](https://ollama.com). You can now run MiniCheck locally on your laptop 💻 with a simple command! More info in the ollama [blog post](https://ollama.com/blog/reduce-hallucinations-with-bespoke-minicheck) and [tweet](https://x.com/ollama/status/1836449420092821731?s=61).
 
 - [2024/09] MiniCheck is now available as a [validator](https://hub.guardrailsai.com) at [Guardrails AI](https://www.guardrailsai.com).
 
