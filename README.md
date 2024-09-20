@@ -1,4 +1,4 @@
-# MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents
+# MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents [EMNLP 2024]
 
 Authors: Liyan Tang, Philippe Laban, Greg Durrett
 
