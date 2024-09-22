@@ -153,12 +153,12 @@ Our 14K synthetic data (7K C2D and 7K D2C) used for model training (MiniCheck-Ro
 
 If you found our work useful, please consider citing our work.
 ```{bibtex}
-@misc{tang2024minicheck,
-      title={MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents}, 
-      author={Liyan Tang and Philippe Laban and Greg Durrett},
-      year={2024},
-      eprint={2404.10774},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
+@InProceedings{tang-etal-2024-minicheck,
+  title = {MiniCheck: Efficient Fact-Checking of LLMs on Grounding Documents},
+  author = {Liyan Tang and Philippe Laban and Greg Durrett},
+  booktitle = {Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing},
+  year = {2024},
+  publisher = {Association for Computational Linguistics},
+  url = {https://arxiv.org/pdf/2404.10774}
 }
 ```
