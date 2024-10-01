@@ -106,7 +106,6 @@ print(raw_prob)   # [0.9805923700332642, 0.007121330592781305]
 # in the MiniCheck series AND is the current SOTA regardless of size.
 # It's also commercially useable! 
 # For commercial licensing, please contact company@bespokelabs.ai
-# Please run `huggingface-cli login` in terminal to login to your HuggingFace account for the access to the model.
 scorer = MiniCheck(model_name='Bespoke-MiniCheck-7B', enable_prefix_caching=False, cache_dir='./ckpts')
 pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
 
