@@ -81,7 +81,7 @@ Our MiniCheck models are available on HuggingFace 🤗 More model details can be
 
 
 > [!IMPORTANT]
-> MiniCheck is a sentence-level fact-checking model. In order to fact-check a multi-sentence claim, the claim should first be broken up into sentences to achieve optimal performance. 
+> MiniCheck(document, sentence) -> [0, 1] is a sentence-level fact-checking model. In order to fact-check a multi-sentence claim, the claim should first be broken up into sentences to achieve optimal performance. 
 
 
 Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Huggingface for the first time and cached in the specified directory.
