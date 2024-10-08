@@ -49,7 +49,7 @@ The benchmark contains the following fields:
 
 |Field| Description |
 |--|--|
-|dataset| One of the 10 datasets in the benchmark|
+|dataset| One of the 11 datasets in the benchmark|
 |doc| Document used to check the corresponding claim|
 |claim| Claim to be checked by the corresponding document|
 |label| 1 if the claim is supported, 0 otherwise|
@@ -77,7 +77,13 @@ pip install "minicheck[llm] @ git+https://github.com/Liyan06/MiniCheck.git@main"
 
 ### Usage
 
-Our MiniCheck models are available on HuggingFace 🤗 More model details can be found from this [collection](https://huggingface.co/collections/lytang/minicheck-and-llm-aggrefact-661c5d387082ad0b433dec65). Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Huggingface for the first time and cached in the specified directory.
+Our MiniCheck models are available on HuggingFace 🤗 More model details can be found from this [collection](https://huggingface.co/collections/lytang/minicheck-and-llm-aggrefact-661c5d387082ad0b433dec65). 
+
+
+<span style="color:orange">Note: MiniCheck is a sentence-level fact-checking model. In order to fact-check a multi-sentence claim, the claim should first be broken up into sentences to achieve optimal performance. </span>
+
+
+Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Huggingface for the first time and cached in the specified directory.
 
 
 ```python
