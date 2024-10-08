@@ -80,7 +80,8 @@ pip install "minicheck[llm] @ git+https://github.com/Liyan06/MiniCheck.git@main"
 Our MiniCheck models are available on HuggingFace 🤗 More model details can be found from this [collection](https://huggingface.co/collections/lytang/minicheck-and-llm-aggrefact-661c5d387082ad0b433dec65). 
 
 
-<span style="color:orange">Note: MiniCheck is a sentence-level fact-checking model. In order to fact-check a multi-sentence claim, the claim should first be broken up into sentences to achieve optimal performance. </span>
+> [!IMPORTANT]
+> MiniCheck is a sentence-level fact-checking model. In order to fact-check a multi-sentence claim, the claim should first be broken up into sentences to achieve optimal performance. 
 
 
 Below is a simple use case of MiniCheck. MiniCheck models will be automatically downloaded from Huggingface for the first time and cached in the specified directory.
