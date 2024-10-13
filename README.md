@@ -17,11 +17,11 @@ Please check out our work [here](https://arxiv.org/pdf/2404.10774.pdf) 📃
 
 - [2024/08] A notebook for using MiniCheck is available [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1s-5TYnGV3kGFMLp798r5N-FXPD8lt2dm?usp=sharing)
 
-- [2024/08] We release the [LLM-AggreFact leaderboard](https://llm-aggrefact.github.io), which currently contains the performance of 27 models on the LLM-AggreFact benchmark, including Llama-3.1, Mistral Large 2 and Claude-3.5.
+- [2024/08] We release the [LLM-AggreFact leaderboard](https://llm-aggrefact.github.io), which currently contains the performance of 32 models on the LLM-AggreFact benchmark, including Qwen-2.5, Llama-3.2, Llama-3.1, Mistral Large 2 and Claude-3.5.
 
 - [2024/08] We includ one additional dataset [RAGTruth](https://arxiv.org/pdf/2401.00396) to our benchmark. We convert the dataset to the same format as in our benchmark and removed those non-checkworthy claims. 
 
-- [2024/08] A stronger model, `Bespoke-MiniCheck-7B`, is now [available](https://huggingface.co/bespokelabs/Bespoke-MiniCheck-7B) on HuggingFace for fact-checking. More details at this [blog post](https://llm-aggrefact.github.io/blog). It's the current SOTA and is commercially useable! Please contact company@bespokelabs.ai for commercial use.
+- [2024/08] We developed a stronger model, `Bespoke-MiniCheck-7B`, which is now [available](https://huggingface.co/bespokelabs/Bespoke-MiniCheck-7B) on HuggingFace for fact-checking. More details at this [blog post](https://llm-aggrefact.github.io/blog). It's the current SOTA and is commercially useable! Please contact company@bespokelabs.ai for commercial use.
 
 - [2024/08] We enable [automic prefix caching](https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html) for much faster inference when repeatedly using the same document for fact-checking.
 
