@@ -90,7 +90,6 @@ Below is a simple use case of MiniCheck. MiniCheck models will be automatically 
 ```python
 from minicheck.minicheck import MiniCheck
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 doc = "A group of students gather in the school library to study for their upcoming final exams."
 claim_1 = "The students are preparing for an examination."
@@ -101,7 +100,7 @@ claim_2 = "The students are on vacation."
 
 #  MiniCheck-Flan-T5-Large (770M) is the best fack-checking model 
 # with size < 1B and reaches GPT-4 performance.
-scorer = MiniCheck(model_name='flan-t5-large', cache_dir='./ckpts')
+scorer = MiniCheck(model_name='flan-t5-large', device='cuda', cache_dir='./ckpts')
 pred_label, raw_prob, _, _ = scorer.score(docs=[doc, doc], claims=[claim_1, claim_2])
 
 print(pred_label) # [1, 0]
