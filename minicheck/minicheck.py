@@ -17,6 +17,7 @@ class MiniCheck:
             - 'deberta-v3-large'
             - 'flan-t5-large'
             - 'Bespoke-MiniCheck-7B'
+            - 'Granite-Guardian-3.3-8B'
             Note: 'Bespoke-MiniCheck-7B' is the most performant fact-checking model in the MiniCheck series.
         
         max_model_len : int or None, optional (default=None)
@@ -28,6 +29,8 @@ class MiniCheck:
                 - 'flan-t5-large'
                     Default: 2048
                 - 'Bespoke-MiniCheck-7B'
+                    Default: 32768
+                - 'Granite-Guardian-3.3-8B'
                     Default: 32768
             For 'Bespoke-MiniCheck-7B', if you have a GPU with low VRAM and get the following:
                 "ValueError: The model's max seq len (XXXX) is larger than the maximum number of 
@@ -48,6 +51,7 @@ class MiniCheck:
 
         max_tokens : int, optional (default=1)
             The maximum number of tokens to generate. Only applicable for 'Bespoke-MiniCheck-7B'.
+            For 'Granite-Guardian-3.3-8B' used max_tokens=2048
 
         enable_prefix_caching : bool, optional (default=False)
             Whether to enable prefix caching for 'Bespoke-MiniCheck-7B'. This can improve performance
@@ -68,8 +72,8 @@ class MiniCheck:
         future grounded fact-checking with much higher throughput and much lower latency.
         '''
 
-        assert model_name in ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B'], \
-            "model_name must be one of ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B']"
+        assert model_name in ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B', 'Granite-Guardian-3.3-8B'], \
+            "model_name must be one of ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B', 'Granite-Guardian-3.3-8B']"
 
         
         if model_name in ['roberta-large', 'deberta-v3-large', 'flan-t5-large']:
@@ -80,6 +84,19 @@ class MiniCheck:
                 cache_dir=cache_dir
             )
         elif model_name == 'Bespoke-MiniCheck-7B':
+            self.model = LLMCheck(
+                model_id=model_name,
+                tensor_parallel_size=tensor_parallel_size,
+                max_tokens=max_tokens,
+                cache_dir=cache_dir,
+                enable_prefix_caching=enable_prefix_caching,
+                max_model_len=max_model_len
+            )
+        elif model_name == 'Granite-Guardian-3.3-8B':
+            if not max_tokens or max_tokens<2048:
+                print("For Granite Guardian 3.3 - fixing the max_tokens to be 2048")
+                max_tokens=2048
+
             self.model = LLMCheck(
                 model_id=model_name,
                 tensor_parallel_size=tensor_parallel_size,

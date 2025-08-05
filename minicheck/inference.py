@@ -1,7 +1,10 @@
 # Adapt code from https://github.com/yuh-zha/AlignScore/tree/main
 
 from nltk.tokenize import sent_tokenize
+import numpy as np
 import torch
+import nltk
+import random
 from transformers import AutoConfig, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForSequenceClassification
 import torch.nn as nn
 from tqdm import tqdm
@@ -284,6 +287,10 @@ class LLMCheck:
 
         if model_id == 'Bespoke-MiniCheck-7B':
             self.model_id = 'bespokelabs/Bespoke-MiniCheck-7B'
+            self.operating_mode="bespoke"
+        elif model_id == 'Granite-Guardian-3.3-8B':
+            self.model_id = 'ibm-granite/granite-guardian-3.3-8b'
+            self.operating_mode="gg_hybrid"
         else:
             raise ValueError("model_id must be 'Bespoke-MiniCheck-7B'")
 
@@ -329,8 +336,11 @@ class LLMCheck:
         self.tokenizer.padding_side = "left"
         terminators = [
             self.tokenizer.eos_token_id,
-            self.tokenizer.convert_tokens_to_ids("<|eot_id|>")
         ]
+        converted_token = self.tokenizer.convert_tokens_to_ids("<|eot_id|>")
+        if converted_token is not None:
+            terminators.append(converted_token)
+
         self.sampling_params = SamplingParams(
             temperature=0,
             max_tokens=self.max_tokens,
@@ -352,14 +362,18 @@ class LLMCheck:
     
 
     def apply_chat_template(self, doc, claim):
-
-        user_prompt = self.user_prompt.replace("[DOCUMENT]", doc).replace("[CLAIM]", claim)
-        message = [
-            {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-        text = self.tokenizer.apply_chat_template(message, add_generation_prompt=True, tokenize=False)
-
+        if self.operating_mode=="bespoke":
+            user_prompt = self.user_prompt.replace("[DOCUMENT]", doc).replace("[CLAIM]", claim)
+            message = [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+            text = self.tokenizer.apply_chat_template(message, add_generation_prompt=True, tokenize=False)
+        elif self.operating_mode=="gg_hybrid":
+            documents = [{'doc_id':'0', 'text': doc}]
+            messages = [{"role": "assistant", "content": claim}]
+            guardian_config = {"criteria_id": "groundedness"}
+            text = self.tokenizer.apply_chat_template(messages, guardian_config = guardian_config, documents=documents, think=True, tokenize=False, add_generation_prompt=True)
         return text
 
     
@@ -373,6 +387,16 @@ class LLMCheck:
             if decoded_token.lower() == 'yes': 
                 support_prob += math.exp(token_prob.logprob)
         
+        return support_prob
+    
+    def get_support_prob_hybrid_gg(self, response, marker="score"):
+        """probs from vllm inference"""
+        response_text = response.outputs[0].text.lower()
+        try:
+            support_prob=1.0 if f"<{marker}> no </{marker}>" in response_text else 0.0
+        except Exception as e:
+            print("Error:", e)
+            support_prob = random.random()
         return support_prob
 
 
@@ -422,38 +446,62 @@ class LLMCheck:
 
         all_prompts = []
         doc_claim_indices = []
-        for index, (doc, claim) in enumerate(zip(docs, claims)):
+        
+        for index, (doc, claim) in tqdm(enumerate(zip(docs, claims)), total=len(docs), desc="Tokenizing"):
             chunks = self.get_all_chunks_per_doc(doc, claim)
             doc_chunks = chunks['doc_chunks']
             claim_repeat = chunks['claim_repeat']
 
-            prompts = [self.apply_chat_template(doc_chunk, claim) for doc_chunk, claim in zip(doc_chunks, claim_repeat)]
+            # Split the claim into individual sentences
+            claim_sentences = self.split_into_sentences(claim)
+
+            # Apply SentenceFusion for granular introspection
+            prompts = []
+            for doc_chunk in doc_chunks:
+                for sentence in claim_sentences:
+                    prompt = self.apply_chat_template(doc_chunk, sentence)
+                    prompts.append(prompt)
             all_prompts.extend(prompts)
             doc_claim_indices.extend([index] * len(prompts))
 
-        responses = self.llm.generate(
-            all_prompts, 
-            self.sampling_params,
-        ) 
-        probs_per_chunk = [self.get_support_prob(responses[idx]) for idx in range(len(responses))]
+        responses = self.llm.generate(all_prompts, self.sampling_params) 
+        if self.operating_mode=="bespoke":
+            probs_per_chunk_sentence = [self.get_support_prob(responses[idx]) for idx in range(len(responses))]
+        elif self.operating_mode=="gg_hybrid":
+            probs_per_chunk_sentence = [self.get_support_prob_hybrid_gg(responses[idx]) for idx in range(len(responses))]
 
         result_dict = {}
-        for index, prob_per_chunk in zip(doc_claim_indices, probs_per_chunk):
+        for index, prob_per_chunk_sentence in zip(doc_claim_indices, probs_per_chunk_sentence):
             if index not in result_dict:
                 result_dict[index] = []
-            result_dict[index].append(prob_per_chunk)
+            result_dict[index].append(prob_per_chunk_sentence)
 
         probs_per_doc_claim_pair = [result_dict[index] for index in range(len(docs))] 
         pred_label, max_support_prob, used_chunk, support_prob_per_chunk = [], [], [], []
-        
+
         for idx in range(len(probs_per_doc_claim_pair)):
-            
+
             doc = docs[idx]
             claim = claims[idx]
 
-            pred_label.append(1 if max(probs_per_doc_claim_pair[idx]) > 0.5 else 0)
-            max_support_prob.append(max(probs_per_doc_claim_pair[idx]))
+            # SentenceFusion: Reshape the probabilities into a matrix of shape (num_chunks x num_sentences)
+            claim_sentences = self.split_into_sentences(claim)
+            num_chunks = len(self.get_all_chunks_per_doc(doc, claim)['doc_chunks'])
+            num_sentences = len(claim_sentences)
+            prob_matrix = np.array(probs_per_doc_claim_pair[idx]).reshape(num_chunks, num_sentences)
+
+            # For each sentence, pick the maximum probability across all chunks
+            max_prob_per_sentence = np.max(prob_matrix, axis=0)
+
+            # The final score is the minimum of these maximum values
+            final_score = np.min(max_prob_per_sentence)
+
+            pred_label.append(1 if final_score > 0.5 else 0)
+            max_support_prob.append(final_score)
             used_chunk.append(self.get_all_chunks_per_doc(doc, claim)['doc_chunks'])
-            support_prob_per_chunk.append(probs_per_doc_claim_pair[idx])
-        
+            support_prob_per_chunk.append(prob_matrix)
+
         return pred_label, max_support_prob, used_chunk, support_prob_per_chunk
+
+    def split_into_sentences(self, text: str) -> List[str]:
+        return nltk.sent_tokenize(text)
