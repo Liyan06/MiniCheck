@@ -6,7 +6,7 @@ import numpy as np
 
 
 class MiniCheck:
-    def __init__(self, model_name='Bespoke-MiniCheck-7B', max_model_len=None, batch_size=16, cache_dir=None, tensor_parallel_size=1, max_tokens=1, enable_prefix_caching=False) -> None:
+    def __init__(self, model_name='Bespoke-MiniCheck-7B', max_model_len=None, batch_size=16, device='cpu', cache_dir=None, tensor_parallel_size=1, max_tokens=1, enable_prefix_caching=False) -> None:
 
         '''
         Parameters:
@@ -57,6 +57,11 @@ class MiniCheck:
             Whether to enable prefix caching for 'Bespoke-MiniCheck-7B'. This can improve performance
             when using the same document chunk to fact-check different claims.
 
+        device : str, optional (default='cpu', available options: 'cpu', 'cuda')
+            The device to use for inference. Options are:
+            - 'cpu': Use the CPU for inference.
+            - 'cuda': Use the GPU for inference. Make sure CUDA is properly installed.
+
         Note:
         (1) MiniCheck-Flan-T5-Large (770M) is the best fack-checking model with size < 1B and reaches GPT-4 performance.
         (2) Bespoke-MiniCheck-7B is the most performant fact-checking model in the MiniCheck series AND
@@ -75,13 +80,15 @@ class MiniCheck:
         assert model_name in ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B', 'Granite-Guardian-3.3-8B'], \
             "model_name must be one of ['roberta-large', 'deberta-v3-large', 'flan-t5-large', 'Bespoke-MiniCheck-7B', 'Granite-Guardian-3.3-8B']"
 
+        assert device in ['cpu', 'cuda'], "device must be one of ['cpu', 'cuda']"
         
         if model_name in ['roberta-large', 'deberta-v3-large', 'flan-t5-large']:
             self.model = Inferencer(
                 model_name=model_name, 
                 batch_size=batch_size, 
                 max_model_len=max_model_len,
-                cache_dir=cache_dir
+                cache_dir=cache_dir,
+                device=device
             )
         elif model_name == 'Bespoke-MiniCheck-7B':
             self.model = LLMCheck(
@@ -90,7 +97,8 @@ class MiniCheck:
                 max_tokens=max_tokens,
                 cache_dir=cache_dir,
                 enable_prefix_caching=enable_prefix_caching,
-                max_model_len=max_model_len
+                max_model_len=max_model_len,
+                device=device
             )
         elif model_name == 'Granite-Guardian-3.3-8B':
             if not max_tokens or max_tokens<2048:

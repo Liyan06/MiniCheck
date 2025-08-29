@@ -27,7 +27,7 @@ def sent_tokenize_with_newlines(text):
 
 
 class Inferencer():
-    def __init__(self, model_name, max_model_len, batch_size, cache_dir) -> None:
+    def __init__(self, model_name, max_model_len, batch_size, cache_dir, device) -> None:
         
         self.model_name = model_name
 
@@ -35,9 +35,12 @@ class Inferencer():
             if not os.path.exists(cache_dir):
                 os.makedirs(cache_dir)
 
+        if device == 'cuda' and not torch.cuda.is_available():
+            device = 'cpu'
+
         if model_name == 'flan-t5-large':
             ckpt = 'lytang/MiniCheck-Flan-T5-Large'
-            self.model = AutoModelForSeq2SeqLM.from_pretrained(ckpt, cache_dir=cache_dir, device_map="auto")
+            self.model = AutoModelForSeq2SeqLM.from_pretrained(ckpt, cache_dir=cache_dir, device_map=device)
             self.tokenizer = AutoTokenizer.from_pretrained(ckpt, cache_dir=cache_dir)
 
             self.max_model_len=2048 if max_model_len is None else max_model_len
@@ -60,7 +63,7 @@ class Inferencer():
 
             self.tokenizer = AutoTokenizer.from_pretrained(ckpt, use_fast=True, revision='main', token=None, cache_dir=cache_dir)
             self.model = AutoModelForSequenceClassification.from_pretrained(
-                ckpt, config=config, revision='main', token=None, ignore_mismatched_sizes=False, cache_dir=cache_dir, device_map="auto")
+                ckpt, config=config, revision='main', token=None, ignore_mismatched_sizes=False, cache_dir=cache_dir, device_map=device)
         
         self.model.eval()
         self.batch_size = batch_size
@@ -271,7 +274,7 @@ class Inferencer():
 
 class LLMCheck:
 
-    def __init__(self, model_id, tensor_parallel_size=1, max_tokens=1, cache_dir=None, enable_prefix_caching=False, max_model_len=None):
+    def __init__(self, model_id, device, tensor_parallel_size=1, max_tokens=1, cache_dir=None, enable_prefix_caching=False, max_model_len=None):
         from vllm import LLM, SamplingParams
 
         import logging
@@ -305,7 +308,7 @@ class LLMCheck:
         self.enable_prefix_caching = enable_prefix_caching
 
         # Check if CUDA is available and get compute capability
-        if torch.cuda.is_available():
+        if device == 'cuda' and torch.cuda.is_available():
             compute_capability = torch.cuda.get_device_capability()
             if compute_capability[0] >= 8:
                 self.dtype = torch.bfloat16
